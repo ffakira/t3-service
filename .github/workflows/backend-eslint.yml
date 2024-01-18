@@ -1,4 +1,4 @@
-name: Backend Test
+name: Backend Eslint
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
           cd backend
           yarn install
 
-      - name: Run tests
+      - name: Run Eslint
         run: |
           cd backend
-          yarn test
+          yarn lint
