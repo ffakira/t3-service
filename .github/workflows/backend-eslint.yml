@@ -2,8 +2,13 @@ name: Backend Eslint
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
+    paths:
+      - 'backend/**'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'backend/**'
 
 jobs:
   test:
