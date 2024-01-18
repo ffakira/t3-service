@@ -168,7 +168,7 @@ router.post("/join", isAuthenticated, async (req: Request, res: Response) => {
         /** @dev No matches found */
         if (getMatchResult.rows.length === 0) {
             return res.status(c.HTTP_STATUS_NOT_FOUND).json({
-                status: 204,
+                status: 404,
                 data: []
             });
         } else {
@@ -203,8 +203,83 @@ router.post("/join", isAuthenticated, async (req: Request, res: Response) => {
     }
 });
 
-router.post("/join/:gameId", isAuthenticated, (req: Request, res: Response) => {
+/**
+ * @dev can only be accessed by the player
+ */
+router.get("/match/:gameId", isAuthenticated, async (req: Request, res: Response) => {
+    const client = await pool.connect();
+    const { gameId } = req.params;
 
+    if (gameId.length === 0) {
+        return res.status(c.HTTP_STATUS_BAD_REQUEST).json({
+            status: 400,
+            error: {
+                message: "No params provided"
+            }
+        });
+    } else {
+        try {
+            await client.query("BEGIN");
+    
+            const sqlGetMatch = `SELECT 
+                user_id, 
+                enemy_id,
+                player_symbol, 
+                enemy_symbol, 
+                player_turn, 
+                board_state 
+                FROM match WHERE id = $1`;
+            const getMatchResult = await client.query(sqlGetMatch, [gameId]);
+
+            if (getMatchResult.rows.length === 0) {
+                return res.status(c.HTTP_STATUS_NOT_FOUND).json({
+                    status: 404,
+                    data: []
+                });
+            }
+            await client.query("COMMIT");
+
+            const userId = getMatchResult.rows[0].user_id;
+            const enemyId = getMatchResult.rows[0].enemy_id;
+
+            //@ts-ignore
+            if (req.session["userId"] === userId || req.session["userId"] == enemyId) {
+                return res.status(c.HTTP_STATUS_UNAUTHORIZED).json({
+                    status: 401,
+                    error: {
+                        message: "Access denied."
+                    }
+                });
+            }
+
+            res.status(c.HTTP_STATUS_OK).json({
+                status: 200,
+                data: {
+                    player: {
+                        symbol: getMatchResult.rows[0].player_symbol,
+                        playerId: userId
+                    },
+                    enemy: {
+                        symbol: getMatchResult.rows[0].enemy_symbol,
+                        playerId: enemyId
+                    },
+                    playerTurn: getMatchResult.rows[0].player_turn,
+                    boardState: getMatchResult.rows[0].board_state
+                }
+            });
+
+        } catch (err) {
+            await client.query("ROLLBACK");
+            res.status(c.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+                status: 500,
+                error: {
+                    message: (err as Error).message
+                }
+            });
+        } finally {
+            client.release();
+        }
+    }
 });
 
 export default router;
