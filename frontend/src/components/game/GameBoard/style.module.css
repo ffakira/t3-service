@@ -1,0 +1,36 @@
+.board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.board-cells {
+    background: #1F3641;
+    box-shadow: 0 10px 0 #10212A;
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
+    height: 100px;
+}
+
+.board-cells__win--player-x {
+    background: #31C3BD80;
+    box-shadow: 0 10px #31C3BD;
+}
+
+.board-cells__win--player-o {
+    background: #F2B13780;
+    box-shadow: 0 10px #F2B137;
+}
+
+.board-cells__player-x:hover {
+    box-shadow: 0 10px #31C3BD;
+}
+
+.board-cells__player-o:hover {
+    box-shadow: 0 10px #F2B137;
+}

@@ -1,0 +1,36 @@
+version: '3'
+services:
+  # postgres db
+  postgres:
+    image: postgres:latest
+    env_file:
+      - .env.development
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # ttt express app
+  ttt-service:
+    build:
+      context: .
+      dockerfile: Dockerfile.development
+    depends_on:
+      - postgres
+    env_file:
+      - .env.development
+    ports:
+      - "9000:9000"
+    volumes:
+      - .:/app
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

@@ -1,0 +1,6 @@
+.vscode
+src/__tests__
+yarn.lock
+.env*
+tsconfig.json
+sessions

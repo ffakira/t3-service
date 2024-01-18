@@ -1,0 +1,20 @@
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 40px 100px;
+    margin-bottom: 60px;
+    width: 100%;
+    max-width: 1980px;
+    height: 20px;
+}
+
+.nav span {
+    font-size: 24px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+}
