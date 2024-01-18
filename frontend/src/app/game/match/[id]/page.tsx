@@ -26,6 +26,12 @@ export default function Match({
     )}`;
   };
 
+  const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    const message ="Are you sure you want to forfeit?"
+    event.returnValue = message;
+    return message;
+  }
+
   useEffect(() => {
     let timer: string | number | NodeJS.Timeout | undefined;
 
@@ -36,7 +42,12 @@ export default function Match({
       }, 1000);
     }
 
-    return () => clearInterval(timer);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
   }, [seconds]);
 
   return (
