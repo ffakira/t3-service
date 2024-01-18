@@ -22,13 +22,6 @@ $ yarn dev
 $ yarn test
 ```
 
-## Features
-
-- Supports logs (dev and prod)
-- Telementry, collect errors and be sent to Sentry dashboard (prod only)
-- Socket.io for bonus challenge points
-- Postman collection json format
-
 ## Environment Variables
 
 You can look in `package.json` as `process.env.NODE_ENV` is passed during runtime
@@ -40,4 +33,6 @@ SENTRY_DNS=<sentry dns>
 POSTGRES_USER=<db_user>
 POSTGRES_PASSWORD=<db_password>
 POSTGRES_DB=<postgres_db>
+
+COOKIE_SECRET=<cookie secret>
 ```

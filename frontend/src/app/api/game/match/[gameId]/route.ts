@@ -33,7 +33,10 @@ export async function GET(
       );
       const resp = await req.json();
 
+      console.log(resp)
+
       if (req.status === 200) {
+        return NextResponse.json({...resp}, { status: 200 });
       } else {
         return NextResponse.json(
           {

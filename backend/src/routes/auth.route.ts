@@ -11,7 +11,7 @@ import { pool } from "../db";
 
 const router = express.Router();
 
-router.get("/isAuth", (req, res) => {
+router.get("/isAuth", (req: Request, res: Response) => {
     return res.status(c.HTTP_STATUS_OK).json({
         status: 200,
         data: {
@@ -25,6 +25,53 @@ router.get("/isAuth", (req, res) => {
     });
 });
 
+router.get("/user/:userId", async (req: Request, res: Response) => {
+    const { userId } = req.params;
+    const client = await pool.connect();
+
+    if (userId.length === 0) {
+        return res.status(c.HTTP_STATUS_BAD_REQUEST).json({
+            status: 400,
+            error: {
+                message: "No user id provided"
+            }
+        });
+    }
+
+    try {
+        await client.query("BEGIN");
+        const sqlGetUser = "SELECT username FROM users WHERE id = $1 LIMIT 1;";
+        const resultGetUser = await client.query(sqlGetUser, [userId]);
+
+        if (resultGetUser.rows.length === 0) {
+            return res.status(c.HTTP_STATUS_NOT_FOUND).json({
+                status: 404,
+                error: {
+                    message: "User not found"
+                }
+            });
+        }
+        await client.query("COMMIT");
+        return res.status(c.HTTP_STATUS_OK).json({
+            status: 200,
+            data: {
+                username: resultGetUser.rows[0].username
+            }
+        });
+    } catch (err) {
+        await client.query("ROLLBACK");
+        console.error((err as Error).message);
+        return res.status(c.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+            status: 500,
+            error: {
+                message: "Internal server error"
+            }
+        });
+    } finally {
+        client.release();
+    }
+});
+
 router.post("/login", async (req: Request, res: Response) => {
     const { username, password } = req.body;
     const client = await pool.connect();
@@ -33,7 +80,6 @@ router.post("/login", async (req: Request, res: Response) => {
         const sqlCheckUser = "SELECT username, id, password FROM users WHERE username = $1 LIMIT 1";
         const resultCheckUser = await client.query(sqlCheckUser, [username]);
         if (resultCheckUser.rows.length === 0) {
-            console.log("hit1");
             return res.status(c.HTTP_STATUS_UNAUTHORIZED).json({
                 status: 401,
                 error: {

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSocketContext } from "@/contexts/SocketContext";
+import { useAuthCtx } from "@/contexts/AuthContext";
 import style from "./style.module.css";
 
 export interface GameBoardProps {
@@ -24,6 +25,7 @@ export default function GameBoard({
   gameId,
 }: GameBoardProps): React.ReactNode {
   const { socket } = useSocketContext();
+  const { userId } = useAuthCtx();
   const [winCells, setWinCells] = useState<Array<Number>>([]);
   const [isWin, setIsWin] = useState<boolean | null>(null);
 
@@ -62,8 +64,9 @@ export default function GameBoard({
 
   useEffect(() => {
     if (socket) {
+      console.log(userId);
       socket.emit("game:join-session", gameId);
-      socket.emit("game:board-state", { gameId, board, playerTurn });
+      socket.emit("game:board-state", { gameId, board, playerTurn, userId });
 
       socket.on("game:board-state", ({ gameId, board, playerTurn, result }) => {
         console.log(result);
@@ -81,7 +84,7 @@ export default function GameBoard({
         }
       };
     }
-  }, [playerTurn, setPlayerTurn]);
+  }, [playerTurn, setPlayerTurn, userId]);
 
   return (
     <div className={style.board}>

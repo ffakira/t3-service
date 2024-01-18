@@ -1,6 +1,7 @@
 "use client";
 
 import GameBoard from "@/components/game/GameBoard/GameBoard";
+import { useAuthCtx } from "@/contexts/AuthContext";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 
@@ -14,6 +15,7 @@ export default function Match({
   const [board, setBoard] = useState<Array<React.ReactNode>>(
     new Array(9).fill(undefined)
   );
+  const { userId } = useAuthCtx();
 
   const [seconds, setSeconds] = useState<number>(0);
 
@@ -27,10 +29,10 @@ export default function Match({
   };
 
   const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-    const message ="Are you sure you want to forfeit?"
+    const message = "Are you sure you want to forfeit?";
     event.returnValue = message;
     return message;
-  }
+  };
 
   useEffect(() => {
     let timer: string | number | NodeJS.Timeout | undefined;
@@ -44,6 +46,17 @@ export default function Match({
 
     window.addEventListener("beforeunload", handleBeforeUnload);
 
+    console.log(userId);
+
+    const getGameMatch = async () => {
+      const req = await fetch(`/api/game/match/${params.id}`);
+      const resp = await req.json();
+
+      if (req.status === 200) {
+        console.log(resp.data)
+      }
+    };
+    getGameMatch();
     return () => {
       clearInterval(timer);
       window.removeEventListener("beforeunload", handleBeforeUnload);
@@ -79,7 +92,7 @@ export default function Match({
           </div>
         </div>
         {/* <p>New Match {params.id} </p> */}
-        <GameBoard 
+        <GameBoard
           playerTurn={playerTurn}
           setPlayerTurn={setPlayerTurn}
           board={board}
