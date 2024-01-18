@@ -13,11 +13,19 @@ import {
 export interface IAuthContext {
   isActive: boolean;
   setIsActive: ReactDispatch<ReactSetStateAction<boolean>>;
+  username: string;
+  setUsername: ReactDispatch<ReactSetStateAction<string>>;
+  userId: number;
+  setUserId: ReactDispatch<ReactSetStateAction<number>>;
 }
 
 export const AuthContext = createContext<IAuthContext>({
   isActive: false,
   setIsActive: () => {},
+  username: "",
+  setUsername: () => {},
+  userId: 0,
+  setUserId: () => {},
 });
 
 AuthContext.displayName = "AuthContext";
@@ -26,6 +34,8 @@ export const useAuthCtx = (): IAuthContext => useContext(AuthContext);
 
 export function AuthProvider({ children }: PropsWithChildren): React.ReactNode {
   const [isActive, setIsActive] = useState<boolean>(false);
+  const [username, setUsername] = useState<string>("");
+  const [userId, setUserId] = useState<number>(0);
 
   useEffect(() => {
     const getAuth = async () => {
@@ -34,8 +44,12 @@ export function AuthProvider({ children }: PropsWithChildren): React.ReactNode {
 
       if (resp.data.isAuth) {
         setIsActive(true);
+        setUsername(resp.data.username);
+        setUserId(resp.data.userId);
       } else {
         setIsActive(false);
+        setUsername("");
+        setUserId(0);
       }
     };
 
@@ -43,7 +57,16 @@ export function AuthProvider({ children }: PropsWithChildren): React.ReactNode {
   }, [isActive]);
 
   return (
-    <AuthContext.Provider value={{ isActive, setIsActive }}>
+    <AuthContext.Provider
+      value={{
+        isActive,
+        setIsActive,
+        username,
+        setUsername,
+        userId,
+        setUserId,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

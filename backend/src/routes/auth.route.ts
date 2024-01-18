@@ -17,6 +17,10 @@ router.get("/isAuth", (req, res) => {
         data: {
             //@ts-ignore
             isAuth: req.session["isAuth"] ?? false,
+            //@ts-ignore
+            username: req.session["username"] ?? "",
+            //@ts-ignore
+            userId: req.session["userId"] ?? 0
         }
     });
 });
