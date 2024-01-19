@@ -29,7 +29,7 @@ export default function History({ params }: HistoryProps): React.ReactNode {
           <Image src="/images/player_x.png" alt="Player X" width={30} height={30} />
           <h3 className="text-xl font-bold uppercase">against johndoe</h3>
         </div>
-        <GameBoard board={board} setBoard={setBoard} />
+        <GameBoard board={board} setBoard={setBoard} gameId={params.id} />
       </div>
     </>
   );

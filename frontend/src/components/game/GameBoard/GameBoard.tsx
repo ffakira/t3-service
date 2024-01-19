@@ -59,6 +59,7 @@ export default function GameBoard({
         return newBoard;
       });
       setPlayerTurn!((prevPlayerTurn) => !prevPlayerTurn);
+      socket?.emit("game:player-turn", { playerTurn, idx, gameId });
     }
   };
 
