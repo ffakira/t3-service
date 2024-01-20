@@ -5,7 +5,7 @@ interface UserModel {
     username: string;
     password: string;
     createdAt: Date;
-    updatedAt: Date;
+    updatedAt?: Date;
 }
 
 const UserSchema = z.object({

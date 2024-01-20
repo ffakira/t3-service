@@ -5,7 +5,8 @@ import { ZodError } from "zod";
 import UserRepository from "../repositories/user.repository";
 import AuthService from "../services/auth.service";
 import { User, UserSchema } from "../models/user.model";
-import logger, { format } from "../services/logger.service";
+import Logger, { format } from "../services/logger.service";
+import passport from "../services/passport-local.service";
 import { DatabaseManager } from "../db";
 
 /**
@@ -20,6 +21,20 @@ class AuthController {
     private static userRepository: UserRepository = new UserRepository(AuthController.databaseManager);
     private static authService: AuthService = new AuthService();
     private static pool: Pool = AuthController.databaseManager.getPool;
+
+    public static async isAuth(req: Request, res: Response) {
+        return res.status(c.HTTP_STATUS_OK).json({
+            status: 200,
+            data: {
+                //@ts-ignore
+                isAuth: req.session["isAuth"] ?? false,
+                //@ts-ignore
+                username: req.session["username"] ?? "",
+                //@ts-ignore
+                userId: req.session["userId"] ?? 0
+            }
+        });
+    }
 
     public static async getUserId(req: Request, res: Response) {
         const client: PoolClient = await AuthController.pool.connect();
@@ -120,13 +135,9 @@ class AuthController {
                 }
             }
 
-            return res.status(c.HTTP_STATUS_OK).json({
-                status: c.HTTP_STATUS_OK
-            });
-
         } catch (err) {
             if (err instanceof ZodError) {
-                logger.info(`${format.brightCyan.bold(`${req.method} ${req.url}`)} Zod Error validating schema: ${JSON.stringify(err.errors)}`);
+                Logger.info(`${format.brightCyan.bold(`${req.method} ${req.url}`)} Zod Error validating schema: ${JSON.stringify(err.errors)}`);
                 return res.status(c.HTTP_STATUS_BAD_REQUEST).json({
                     status: c.HTTP_STATUS_BAD_REQUEST,
                     error: {
@@ -136,7 +147,8 @@ class AuthController {
             }
 
             if (err instanceof Error) {
-                console.error(`Generic error: ${err.message}`);
+                Logger.error(`${format.red.bold(`${req.method} ${req.url}`)}`);
+
                 return res.status(c.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
                     status: c.HTTP_STATUS_INTERNAL_SERVER_ERROR,
                     error: {
@@ -150,15 +162,32 @@ class AuthController {
     }
 
     public static async register(req: Request, res: Response, next: NextFunction) {
-        const client: PoolClient = await this.pool.connect();
-
-        try {
-
-        } catch (err) {
-
-        } finally {
-            client.release();
-        }
+        passport.authenticate("local-register", (err: Error, user: unknown, info: { message: string }) => {
+            if (err) {
+                return res.status(c.HTTP_STATUS_INTERNAL_SERVER_ERROR).json({
+                    status: 500,
+                    error: {
+                        message: err.message
+                    }
+                });
+            }
+    
+            if (!user) {
+                return res.status(c.HTTP_STATUS_BAD_REQUEST).json({
+                    status: 400,
+                    error: {
+                        message: info.message
+                    }
+                });
+            }
+    
+            return res.status(c.HTTP_STATUS_CREATED).json({
+                status: 201,
+                data: {
+                    user
+                }
+            });
+        })(req, res, next);
     }
 
     public static async logout(req: Request, res: Response) {
