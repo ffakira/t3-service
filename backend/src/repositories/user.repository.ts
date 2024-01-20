@@ -1,6 +1,6 @@
 import { Pool, PoolClient } from "pg";
 import { DatabaseManager } from "../db";
-import User from "../models/user.model";
+import { User } from "../models/user.model";
 
 class UserRepository {
     private pool: Pool;
@@ -13,7 +13,7 @@ class UserRepository {
         const client: PoolClient = await this.pool.connect();
 
         try {
-            const sqlGetUser = "SELECT id, username FROM users WHERE id = $1;";
+            const sqlGetUser = "SELECT id, username, password FROM users WHERE id = $1;";
             const result = await client.query(sqlGetUser, [userId]);
 
             if (result.rows.length === 0) return null;
@@ -33,7 +33,7 @@ class UserRepository {
         const client: PoolClient = await this.pool.connect();
 
         try {
-            const sqlGetUser = "SELECT id, username FROM users WHERE id = $1;";
+            const sqlGetUser = "SELECT id, username, password FROM users WHERE username = $1;";
             const result = await client.query(sqlGetUser, [username]);
 
             if (result.rows.length === 0) return null;

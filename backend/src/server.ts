@@ -11,7 +11,7 @@ import FileStore from "session-file-store";
 
 import gamesRoute from "./routes/game.route";
 import authRoute from "./routes/auth.route";
-import { createTable } from "./db";
+import { DatabaseManager } from "./db";
 import onConnection from "./sockets";
 
 /**
@@ -32,7 +32,7 @@ const FileStoreInstance = FileStore(session);
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:3000",
+        origin: ["http://localhost:3000", "http://143.110.146.12:3000"],
         methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
         credentials: true
     },
@@ -58,7 +58,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: ["http://localhost:3000", "http://143.110.146.12:3000/"],
     methods: ["GET", "HEAD", "PUT", "PATCH", "POST", "DELETE"],
     credentials: true
 }));
@@ -88,7 +88,9 @@ app.use("/api/games", gamesRoute);
  */
 io.on("connection", (socket) => onConnection(io, socket));
 
+const databaseManager: DatabaseManager = new DatabaseManager();
+
 server.listen(process.env.PORT || 9000, async () => {
-    await createTable();
+    await databaseManager.initializeTables();
     console.log("server running :9000");
 });
