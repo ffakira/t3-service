@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS user_stats (
     id SERIAL PRIMARY KEY,
-    user_id SERIAL REFERENCES users(id);
+    user_id SERIAL REFERENCES users(id),
     total_matches INTEGER DEFAULT 0,
     win_pvp INTEGER DEFAULT 0,
     loose_pvp INTEGER DEFAULT 0,

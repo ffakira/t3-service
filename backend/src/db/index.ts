@@ -15,19 +15,15 @@ export const pool = new Pool({
 });
 
 export class DatabaseManager {
-    private pool: Pool;
+    private pool: Pool = new Pool({
+        user: process.env.POSTGRES_USER,
+        database: process.env.POSTGRES_DB,
+        password: process.env.POSTGRES_PASSWORD,
+        host: "postgres",
+        // host: "localhost"
+    });
 
-    constructor () {
-        this.pool = new Pool({
-            user: process.env.POSTGRES_USER,
-            database: process.env.POSTGRES_DB,
-            password: process.env.POSTGRES_PASSWORD,
-            host: "postgres",
-            // host: "localhost"
-        });
-    }
-
-    async initializeTable () {
+    async initializeTables() {
         const client = await this.pool.connect();
 
         try {
@@ -42,8 +38,6 @@ export class DatabaseManager {
         } catch (err) {
             console.error(`Error initializing database: ${(err as Error).message}`);
             await client.query("ROLLBACK");
-        } finally {
-            client.release();
         }
     }
 
@@ -86,12 +80,10 @@ export class DatabaseManager {
         } catch (readFileError) {
             console.error(`Error reading file: ${(readFileError as Error).message}`);
             await client.query("ROLLBACK");
-        } finally {
-            client.release();
         }
     }
 
-    get getPool () {
+    get getPool() {
         return this.pool;
     }
 }
